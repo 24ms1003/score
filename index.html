@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ソフトテニス スコア記録表</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .input {
+      @apply border border-gray-300 rounded-md px-3 py-2 w-full;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 p-6">
+  <div class="max-w-5xl mx-auto grid gap-6">
+    <h1 class="text-3xl font-bold text-center">ソフトテニス スコア記録表</h1>
+
+    <div class="bg-white p-4 rounded-xl shadow-md grid gap-4">
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <h2 class="font-semibold mb-1">明治学院</h2>
+          <input class="input mt-1" placeholder="後衛" id="teamAPlayer1">
+          <input class="input mt-1" placeholder="前衛" id="teamAPlayer2">
+        </div>
+        <div>
+          <h2 class="font-semibold mb-1">相手大学</h2>
+          <input class="input" placeholder="チーム名" id="teamBName">
+          <input class="input mt-1" placeholder="後衛" id="teamBPlayer1">
+          <input class="input mt-1" placeholder="前衛" id="teamBPlayer2">
+        </div>
+      </div>
+
+      <div>
+        <label class="font-medium block mb-1">ゲーム数</label>
+        <select id="gameType" class="input w-32">
+          <option value="4">7ゲーム</option>
+          <option value="5">9ゲーム</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="bg-white p-4 rounded-xl shadow-md grid gap-4">
+      <h2 class="text-lg font-semibold">プレー入力</h2>
+      <div class="grid md:grid-cols-5 grid-cols-2 gap-2">
+        <select id="server" class="input">
+          <option value="明治学院">明治学院</option>
+          <option value="相手大学">相手大学</option>
+        </select>
+        <select id="serveType" class="input">
+          <option value="1st">ファースト</option>
+          <option value="2nd">セカンド</option>
+        </select>
+        <select id="serveSide" class="input">
+          <option value="W">ワイド</option>
+          <option value="M">ミドル</option>
+          <option value="C">センター</option>
+        </select>
+        <select id="point" class="input">
+          <option value="明治学院/後衛">明治学院/後衛</option>
+          <option value="明治学院/前衛">明治学院/前衛</option>
+          <option value="相手大学/後衛">相手大学/後衛</option>
+          <option value="相手大学/前衛">相手大学/前衛</option>
+        </select>
+        <select id="playResult" class="input">
+          <option value="">--選択--</option>
+          <option value="ダブルフォルト">ダブルフォルト</option>
+          <option value="レシーブ/アウト">レシーブ/アウト</option>
+          <option value="レシーブ/ネット">レシーブ/ネット</option>
+          <option value="ストローク/アウト">ストローク/アウト</option>
+          <option value="ストローク/ネット">ストローク/ネット</option>
+          <option value="ボレー/アウト">ボレー/アウト</option>
+          <option value="ボレー/ネット">ボレー/ネット</option>
+          <option value="ストローク/得点">ストローク/得点</option>
+          <option value="ボレー/得点">ボレー/得点</option>
+          <option value="レシーブ/得点">レシーブ/得点</option>
+          <option value="スマッシュ/得点">スマッシュ</option>
+          <option value="その他/得点">その他/得点</option>
+          <option value="その他/失点">その他/失点</option>
+        </select>
+        <input id="customResult" placeholder="自由入力" class="input" />
+      </div>
+      <button onclick="addPlay()" class="mt-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-xl">
+        記録追加
+      </button>
+
+      <div class="mt-4">
+        <h3 class="font-semibold mb-2">記録済みプレー</h3>
+        <ul id="playLog" class="list-disc list-inside space-y-1 text-sm"></ul>
+      </div>
+    </div>
+
+    <div class="bg-white p-4 rounded-xl shadow-md">
+      <h2 class="text-lg font-semibold mb-2">スコア表示</h2>
+      <div class="grid grid-cols-2 text-center text-xl font-bold mb-4">
+        <div>
+          <span id="pointA">0</span> ポイント<br>明治学院
+        </div>
+        <div>
+          <span id="pointB">0</span> ポイント<br>相手大学
+        </div>
+      </div>
+      <div class="grid grid-cols-2 text-center text-xl font-bold">
+        <div>
+          <span id="scoreA">0</span> ゲーム<br>明治学院
+        </div>
+        <div>
+          <span id="scoreB">0</span> ゲーム<br>相手大学
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let scoreA = 0;
+    let scoreB = 0;
+    let gameA = 0;
+    let gameB = 0;
+
+    function addPlay() {
+      const server = document.getElementById('server').value;
+      const serveType = document.getElementById('serveType').value;
+      const serveSide = document.getElementById('serveSide').value;
+      const point = document.getElementById('point').value;
+      const playResult = document.getElementById('playResult').value;
+      const customResult = document.getElementById('customResult').value.trim();
+      const POINTS_TO_WIN_GAME = parseInt(document.getElementById("gameType").value);
+      const list = document.getElementById('playLog');
+      const teamA = ["明治学院/後衛", "明治学院/前衛"];
+
+      const result = customResult || playResult;
+      if (!result) return;
+
+      const log = `[${server}] ${serveType} - ${serveSide} - [${point}] - ${result}`;
+      const item = document.createElement('li');
+      item.textContent = log;
+      list.appendChild(item);
+
+      if (["スマッシュ", "ストローク/得点", "ボレー/得点", "レシーブ/得点", "スマッシュ/得点", "その他/得点"].includes(result)) {
+        if (teamA.includes(point)) scoreA++;
+        else scoreB++;
+      } else if (["ダブルフォルト", "レシーブ/アウト", "レシーブ/ネット", "ストローク/アウト", "ストローク/ネット", "ボレー/アウト", "ボレー/ネット", "その他/失点"].includes(result)) {
+        if (teamA.includes(point)) scoreB++;
+        else scoreA++;
+      }
+
+      let gameFinished = false;
+      if (scoreA >= POINTS_TO_WIN_GAME && scoreA - scoreB >= 2) {
+        gameA++;
+        gameFinished = true;
+      } else if (scoreB >= POINTS_TO_WIN_GAME && scoreB - scoreA >= 2) {
+        gameB++;
+        gameFinished = true;
+      }
+
+      if (gameFinished) {
+        scoreA = 0;
+        scoreB = 0;
+
+        const divider = document.createElement('li');
+        divider.textContent = `---- ゲーム ${gameA + gameB} 終了 ----`;
+        divider.classList.add('font-semibold', 'text-blue-500', 'mt-2');
+        list.appendChild(divider);
+      }
+
+      document.getElementById("scoreA").textContent = gameA;
+      document.getElementById("scoreB").textContent = gameB;
+      document.getElementById("pointA").textContent = scoreA;
+      document.getElementById("pointB").textContent = scoreB;
+
+      document.getElementById('customResult').value = '';
+      document.getElementById('playResult').value = '';
+    }
+  </script>
+</body>
+</html>
